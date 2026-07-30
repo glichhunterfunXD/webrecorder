@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Minefun Recorder Pro</title>
+
+<meta name="description" content="軽量ブラウザ録画ツール">
+
+<meta name="theme-color" content="#171717">
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="icon" href="favicon.ico">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎥 Minefun Recorder Pro</h1>
+
+<div class="card">
+
+<h2>録画設定</h2>
+
+<label>解像度</label>
+
+<select id="resolution">
+<option value="original" selected>元の画質</option>
+<option value="1080">1920×1080</option>
+<option value="720">1280×720</option>
+<option value="480">854×480</option>
+</select>
+
+<label>FPS</label>
+
+<select id="fps">
+<option value="60" selected>60 FPS</option>
+<option value="30">30 FPS</option>
+</select>
+
+<label>画質（ビットレート）</label>
+
+<select id="bitrate">
+<option value="4000000">4 Mbps</option>
+<option value="8000000" selected>8 Mbps</option>
+<option value="12000000">12 Mbps</option>
+<option value="16000000">16 Mbps</option>
+</select>
+
+<label>
+
+<input
+type="checkbox"
+id="audio"
+checked>
+
+タブ音声を録画
+
+</label>
+
+<label>
+
+<input
+type="checkbox"
+id="lite">
+
+Chromebook軽量モード
+
+</label>
+
+<label>保存ファイル名</label>
+
+<input
+type="text"
+id="filename"
+value="minefun_recording">
+
+<div class="buttons">
+
+<button id="start">
+
+🎥 録画開始
+
+</button>
+
+<button
+id="stop"
+disabled>
+
+■ 停止
+
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>録画情報</h2>
+
+<p>
+
+状態：
+
+<span id="status">
+
+待機中
+
+</span>
+
+</p>
+
+<p>
+
+録画時間：
+
+<span id="time">
+
+00:00
+
+</span>
+
+</p>
+
+<p>
+
+推定サイズ：
+
+<span id="size">
+
+0 MB
+
+</span>
+
+</p>
+
+</div>
+
+</div>
+
+<!-- 保存確認ダイアログ -->
+
+<div
+id="saveDialog"
+class="dialog hidden">
+
+<div class="dialog-box">
+
+<h2>
+
+録画が完了しました
+
+</h2>
+
+<p>
+
+保存ファイル名
+
+</p>
+
+<input
+type="text"
+id="saveName">
+
+<p>
+
+録画時間：
+
+<span id="finalTime">
+
+00:00
+
+</span>
+
+</p>
+
+<p>
+
+ファイルサイズ：
+
+<span id="finalSize">
+
+0 MB
+
+</span>
+
+</p>
+
+<div class="buttons">
+
+<button id="saveBtn">
+
+💾 保存する
+
+</button>
+
+<button id="discardBtn">
+
+🗑 保存しない
+
+</button>
+
+<button id="closeBtn">
+
+✖ 閉じる
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
