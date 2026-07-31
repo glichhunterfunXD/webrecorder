@@ -1,15 +1,19 @@
-// ======================================
-// Minefun Recorder Pro V2 Lite
+// =======================================
+// Minefun Recorder Pro V3
+// GitHub Pages Edition
 // Part 1
-// ======================================
+// =======================================
 
+// ---------- ボタン ----------
 const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 
+// ---------- 表示 ----------
 const statusText = document.getElementById("status");
 const timerText = document.getElementById("time");
 const sizeText = document.getElementById("size");
 
+// ---------- 設定 ----------
 const resolution = document.getElementById("resolution");
 const fps = document.getElementById("fps");
 const bitrate = document.getElementById("bitrate");
@@ -18,9 +22,8 @@ const lite = document.getElementById("lite");
 
 const filename = document.getElementById("filename");
 
-// 保存ダイアログ
+// ---------- 保存ダイアログ ----------
 const saveDialog = document.getElementById("saveDialog");
-const preview = document.getElementById("preview");
 
 const saveBtn = document.getElementById("saveBtn");
 const discardBtn = document.getElementById("discardBtn");
@@ -30,6 +33,7 @@ const saveName = document.getElementById("saveName");
 const finalTime = document.getElementById("finalTime");
 const finalSize = document.getElementById("finalSize");
 
+// ---------- 録画 ----------
 let recorder = null;
 let stream = null;
 let recordedBlob = null;
@@ -38,19 +42,27 @@ let chunks = [];
 let timer = null;
 let seconds = 0;
 
+// =======================================
+// 時間表示
+// =======================================
+
 function formatTime(sec){
 
-    const m = String(
-        Math.floor(sec/60)
-    ).padStart(2,"0");
+    const m =
+        String(Math.floor(sec/60))
+        .padStart(2,"0");
 
-    const s = String(
-        sec%60
-    ).padStart(2,"0");
+    const s =
+        String(sec%60)
+        .padStart(2,"0");
 
     return `${m}:${s}`;
 
 }
+
+// =======================================
+// タイマー更新
+// =======================================
 
 function updateTimer(){
 
@@ -59,39 +71,44 @@ function updateTimer(){
     timerText.textContent =
         formatTime(seconds);
 
-    // 3秒ごとだけサイズ更新
+    // 3秒ごとだけサイズ更新（軽量化）
+
     if(seconds%3===0){
 
         const estimate =
-        (
-            seconds *
-            Number(bitrate.value) /
-            8
-        )/1000000;
+            (
+                seconds *
+                Number(bitrate.value)
+                /8
+            )/1000000;
 
         sizeText.textContent =
-        estimate.toFixed(1)+" MB";
+            estimate.toFixed(1)+" MB";
 
     }
 
 }
 
+// =======================================
+// 録画開始
+// =======================================
+
 async function startRecording(){
 
-    chunks=[];
+    chunks = [];
 
-    recordedBlob=null;
+    recordedBlob = null;
 
-    seconds=0;
+    seconds = 0;
 
-    timerText.textContent="00:00";
-    sizeText.textContent="0 MB";
+    timerText.textContent = "00:00";
+    sizeText.textContent = "0 MB";
 
     saveDialog.classList.add("hidden");
 
-    let video={
+    let video = {
 
-        frameRate:Number(fps.value)
+        frameRate : Number(fps.value)
 
     };
 
@@ -99,22 +116,22 @@ async function startRecording(){
 
         case "1080":
 
-            video.width=1920;
-            video.height=1080;
+            video.width = 1920;
+            video.height = 1080;
 
             break;
 
         case "720":
 
-            video.width=1280;
-            video.height=720;
+            video.width = 1280;
+            video.height = 720;
 
             break;
 
         case "480":
 
-            video.width=854;
-            video.height=480;
+            video.width = 854;
+            video.height = 480;
 
             break;
 
@@ -122,82 +139,86 @@ async function startRecording(){
 
     try{
 
-        stream=
+        stream =
         await navigator.mediaDevices.getDisplayMedia({
 
             video,
 
-            audio:audio.checked
+            audio : audio.checked
 
         });
 
-        let options={
+        let options = {
 
-            videoBitsPerSecond:
+            videoBitsPerSecond :
             Number(bitrate.value)
 
         };
 
         // Chromebook軽量モード
+
         if(
+
             lite.checked &&
+
             MediaRecorder.isTypeSupported(
                 "video/webm;codecs=vp8"
             )
+
         ){
 
-            options.mimeType=
+            options.mimeType =
             "video/webm;codecs=vp8";
 
         }
+
         else if(
+
             MediaRecorder.isTypeSupported(
                 "video/webm;codecs=vp9"
             )
+
         ){
 
-            options.mimeType=
+            options.mimeType =
             "video/webm;codecs=vp9";
 
         }
 
-        recorder=
+        recorder =
         new MediaRecorder(
             stream,
             options
         );
 
-        recorder.ondataavailable=e=>{
+        recorder.ondataavailable = (e)=>{
 
             if(
                 e.data &&
                 e.data.size>0
             ){
 
-                chunks.push(
-                    e.data
-                );
+                chunks.push(e.data);
 
             }
 
         };
-              recorder.onstop = () => {
+                // 録画終了時
+        recorder.onstop = ()=>{
 
             clearInterval(timer);
 
+            // Blob作成
             recordedBlob = new Blob(
                 chunks,
                 {
-                    type: recorder.mimeType || "video/webm"
+                    type:
+                    recorder.mimeType ||
+                    "video/webm"
                 }
             );
 
-            const url =
-                URL.createObjectURL(recordedBlob);
-
-            preview.src = url;
-            preview.load();
-
+            // 保存ダイアログ更新
             saveName.value =
                 filename.value.trim() ||
                 "recording";
@@ -212,9 +233,8 @@ async function startRecording(){
                     1024
                 ).toFixed(2) + " MB";
 
-            saveDialog.classList.remove(
-                "hidden"
-            );
+            // ダイアログ表示
+            saveDialog.classList.remove("hidden");
 
             statusText.textContent =
                 "録画完了";
@@ -222,6 +242,7 @@ async function startRecording(){
             startBtn.disabled = false;
             stopBtn.disabled = true;
 
+            // 画面共有を終了
             if(stream){
 
                 stream
@@ -232,12 +253,12 @@ async function startRecording(){
 
         };
 
-        // 超軽量版
-        // 1秒ごとにデータを渡さず、
-        // 停止時にまとめて受け取る
+        // 録画開始
+        // 停止時までまとめて保存
         recorder.start();
 
-        timer = setInterval(
+        timer =
+        setInterval(
             updateTimer,
             1000
         );
@@ -249,6 +270,7 @@ async function startRecording(){
         stopBtn.disabled = false;
 
     }
+
     catch(err){
 
         console.error(err);
@@ -259,9 +281,16 @@ async function startRecording(){
             err.message
         );
 
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+
     }
 
 }
+
+// =======================================
+// 録画停止
+// =======================================
 
 function stopRecording(){
 
@@ -274,26 +303,37 @@ function stopRecording(){
 
     }
 
-}
-// ======================================
-// Minefun Recorder Pro V2 Lite
-// Part 3
-// ======================================
+    // 念のため画面共有も終了
+    if(stream){
 
+        stream
+        .getTracks()
+        .forEach(track=>track.stop());
+
+    }
+
+}
+// =======================================
 // 保存
-saveBtn.onclick = () => {
+// =======================================
+
+saveBtn.onclick = ()=>{
 
     if(!recordedBlob) return;
 
-    const url = URL.createObjectURL(recordedBlob);
+    const url =
+        URL.createObjectURL(recordedBlob);
 
-    const a = document.createElement("a");
+    const a =
+        document.createElement("a");
 
     a.href = url;
 
     a.download =
-        (saveName.value.trim() || "recording") +
-        ".webm";
+        (
+            saveName.value.trim() ||
+            "recording"
+        ) + ".webm";
 
     document.body.appendChild(a);
 
@@ -301,43 +341,27 @@ saveBtn.onclick = () => {
 
     a.remove();
 
-    setTimeout(() => {
+    setTimeout(()=>{
 
         URL.revokeObjectURL(url);
 
     },1000);
 
-    // プレビューも解放
-    if(preview.src){
-
-        URL.revokeObjectURL(preview.src);
-
-    }
-
-    preview.removeAttribute("src");
-    preview.load();
-
     recordedBlob = null;
     chunks = [];
 
     saveDialog.classList.add("hidden");
 
-    statusText.textContent = "保存完了";
+    statusText.textContent =
+        "保存完了";
 
 };
 
+// =======================================
 // 保存しない
-discardBtn.onclick = () => {
+// =======================================
 
-    if(preview.src){
-
-        URL.revokeObjectURL(preview.src);
-
-    }
-
-    preview.removeAttribute("src");
-
-    preview.load();
+discardBtn.onclick = ()=>{
 
     recordedBlob = null;
 
@@ -345,55 +369,74 @@ discardBtn.onclick = () => {
 
     saveDialog.classList.add("hidden");
 
-    statusText.textContent = "保存しませんでした";
+    statusText.textContent =
+        "保存しませんでした";
 
 };
 
+// =======================================
 // 閉じる
-closeBtn.onclick = () => {
+// =======================================
+
+closeBtn.onclick = ()=>{
 
     saveDialog.classList.add("hidden");
 
 };
 
-// 録画開始
-startBtn.onclick = () => {
+// =======================================
+// ボタン
+// =======================================
+
+startBtn.onclick = ()=>{
 
     startRecording();
 
 };
 
-// 録画停止
-stopBtn.onclick = () => {
+stopBtn.onclick = ()=>{
 
     stopRecording();
 
 };
 
-// ページ終了
-window.onbeforeunload = () => {
+// =======================================
+// ページ終了時
+// =======================================
 
-    if(
-        recorder &&
-        recorder.state === "recording"
-    ){
+window.addEventListener(
+    "beforeunload",
+    ()=>{
 
-        recorder.stop();
+        if(
+            recorder &&
+            recorder.state==="recording"
+        ){
+
+            recorder.stop();
+
+        }
+
+        if(stream){
+
+            stream
+            .getTracks()
+            .forEach(track=>track.stop());
+
+        }
 
     }
+);
 
-    if(stream){
+// =======================================
+// 初期表示
+// =======================================
 
-        stream
-        .getTracks()
-        .forEach(track => track.stop());
+statusText.textContent = "待機中";
+timerText.textContent = "00:00";
+sizeText.textContent = "0 MB";
 
-    }
+startBtn.disabled = false;
+stopBtn.disabled = true;
 
-    if(preview.src){
-
-        URL.revokeObjectURL(preview.src);
-
-    }
-
-};
+saveDialog.classList.add("hidden");
